@@ -72,11 +72,20 @@ const Invoice = () => {
                         <span className="hidden sm:inline">PDF</span>
                     </button>
                     <a
+                        href={`https://mail.google.com/mail/?view=cm&fs=1&to=Info@elitetransportcare.com&su=Invoice ${invoiceData.number} - ${profile.name}&body=Adjunto la factura correspondiente a la semana %0D%0A%0D%0AGracias,%0D%0A${profile.name}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-red-700 transition-colors"
+                    >
+                        <Share2 size={20} />
+                        <span>Gmail</span>
+                    </a>
+                    <a
                         href={`mailto:Info@elitetransportcare.com?subject=Invoice ${invoiceData.number} - ${profile.name}&body=Adjunto la factura correspondiente a la semana %0D%0A%0D%0AGracias,%0D%0A${profile.name}`}
                         className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-green-700 transition-colors"
                     >
                         <Share2 size={20} />
-                        <span>Enviar a Compañía</span>
+                        <span>Otro Correo</span>
                     </a>
                 </div>
             </div>
