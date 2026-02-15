@@ -52,6 +52,43 @@ const Invoice = () => {
         window.print();
     };
 
+    const [showEmailModal, setShowEmailModal] = useState(false);
+    const [recipientEmail, setRecipientEmail] = useState('');
+    const [sendMode, setSendMode] = useState<'gmail' | 'default'>('default');
+
+    const handleOpenEmailModal = (mode: 'gmail' | 'default') => {
+        setSendMode(mode);
+        setShowEmailModal(true);
+    };
+
+    const handleSendEmail = () => {
+        if (!recipientEmail) {
+            alert("Por favor, ingresa el correo de la compañía.");
+            return;
+        }
+
+        const subject = `Invoice ${invoiceData.number} - ${profile.name}`;
+        const body = `Adjunto la factura correspondiente a la semana.\n\nGracias,\n${profile.name}`;
+
+        // Encode components
+        const encSubject = encodeURIComponent(subject);
+        const encBody = encodeURIComponent(body);
+
+        let url = '';
+
+        if (sendMode === 'gmail') {
+            // Gmail web interface
+            url = `https://mail.google.com/mail/?view=cm&fs=1&to=${recipientEmail}&su=${encSubject}&body=${encBody}`;
+            window.open(url, '_blank', 'noopener,noreferrer');
+        } else {
+            // Default mailto
+            url = `mailto:${recipientEmail}?subject=${encSubject}&body=${encBody}`;
+            window.location.href = url;
+        }
+
+        setShowEmailModal(false);
+    };
+
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col items-center py-8">
             {/* Toolbar - Hidden when printing */}
@@ -71,24 +108,61 @@ const Invoice = () => {
                         <Printer size={20} />
                         <span className="hidden sm:inline">PDF</span>
                     </button>
-                    <a
-                        href={`https://mail.google.com/mail/?view=cm&fs=1&to=Info@elitetransportcare.com&su=Invoice ${invoiceData.number} - ${profile.name}&body=Adjunto la factura correspondiente a la semana %0D%0A%0D%0AGracias,%0D%0A${profile.name}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    <button
+                        onClick={() => handleOpenEmailModal('gmail')}
                         className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-red-700 transition-colors"
                     >
                         <Share2 size={20} />
                         <span>Gmail</span>
-                    </a>
-                    <a
-                        href={`mailto:Info@elitetransportcare.com?subject=Invoice ${invoiceData.number} - ${profile.name}&body=Adjunto la factura correspondiente a la semana %0D%0A%0D%0AGracias,%0D%0A${profile.name}`}
+                    </button>
+                    <button
+                        onClick={() => handleOpenEmailModal('default')}
                         className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-green-700 transition-colors"
                     >
                         <Share2 size={20} />
                         <span>Otro Correo</span>
-                    </a>
+                    </button>
                 </div>
             </div>
+
+            {/* Email Modal */}
+            {showEmailModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 print:hidden">
+                    <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">Enviar Factura</h3>
+                        <p className="text-sm text-gray-500 mb-4">Ingresa el correo de la compañía para enviar la factura.</p>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Para:</label>
+                                <input
+                                    type="email"
+                                    value={recipientEmail}
+                                    onChange={(e) => setRecipientEmail(e.target.value)}
+                                    placeholder="ej: billing@company.com"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                    autoFocus
+                                />
+                            </div>
+
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    onClick={() => setShowEmailModal(false)}
+                                    className="flex-1 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={handleSendEmail}
+                                    className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30"
+                                >
+                                    Enviar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Invoice Sheet */}
             <div className="bg-white w-full max-w-[210mm] p-10 md:p-12 shadow-xl print:shadow-none print:w-full text-gray-800 text-sm leading-normal">
