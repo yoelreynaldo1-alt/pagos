@@ -1,34 +1,10 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, User, MapPin, Building, Mail } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useLanguage } from '@/context/LanguageContext';
 
+// ... (component start)
 const Profile = () => {
+    const { t } = useLanguage();
     const navigate = useNavigate();
-    const [profile, setProfile] = useState({
-        name: '',
-        address: '',
-        city: '',
-        email: '',
-        company: 'Elite Transport Care' // Default
-    });
-
-    useEffect(() => {
-        const saved = localStorage.getItem('user-profile');
-        if (saved) {
-            setProfile(JSON.parse(saved));
-        }
-    }, []);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setProfile({ ...profile, [e.target.name]: e.target.value });
-    };
-
-    const handleSave = () => {
-        localStorage.setItem('user-profile', JSON.stringify(profile));
-        navigate('/');
-    };
-
+    // ...
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pb-20">
             {/* Header */}
@@ -39,7 +15,7 @@ const Profile = () => {
                 >
                     <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
                 </button>
-                <h1 className="text-lg font-bold text-gray-900 dark:text-white">Perfil del Conductor</h1>
+                <h1 className="text-lg font-bold text-gray-900 dark:text-white">{t('profile.title')}</h1>
             </header>
 
             <main className="px-4 py-6 max-w-lg mx-auto space-y-6">
@@ -50,13 +26,13 @@ const Profile = () => {
                             <User size={40} />
                         </div>
                         <p className="text-sm text-gray-500 text-center">
-                            Completa tus datos para que aparezcan automáticamente en tus facturas.
+                            {t('profile.subtitle')}
                         </p>
                     </div>
 
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 ml-1">Nombre Completo</label>
+                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 ml-1">{t('profile.name')}</label>
                             <div className="relative">
                                 <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                                 <input
@@ -64,14 +40,14 @@ const Profile = () => {
                                     name="name"
                                     value={profile.name}
                                     onChange={handleChange}
-                                    placeholder="Ej: Juan Pérez"
+                                    placeholder={t('profile.placeholders.name')}
                                     className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900/50 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 ml-1">Dirección</label>
+                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 ml-1">{t('profile.address')}</label>
                             <div className="relative">
                                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                                 <input
@@ -79,14 +55,14 @@ const Profile = () => {
                                     name="address"
                                     value={profile.address}
                                     onChange={handleChange}
-                                    placeholder="Ej: 123 Main St"
+                                    placeholder={t('profile.placeholders.address')}
                                     className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900/50 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 ml-1">Ciudad, Estado, Zip</label>
+                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 ml-1">{t('profile.city')}</label>
                             <div className="relative">
                                 <Building className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                                 <input
@@ -94,14 +70,14 @@ const Profile = () => {
                                     name="city"
                                     value={profile.city}
                                     onChange={handleChange}
-                                    placeholder="Ej: Miami, FL 33100"
+                                    placeholder={t('profile.placeholders.city')}
                                     className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900/50 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 ml-1">Correo Electrónico</label>
+                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 ml-1">{t('profile.email')}</label>
                             <div className="relative">
                                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                                 <input
@@ -109,7 +85,7 @@ const Profile = () => {
                                     name="email"
                                     value={profile.email}
                                     onChange={handleChange}
-                                    placeholder="Ej: juan@email.com"
+                                    placeholder={t('profile.placeholders.email')}
                                     className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900/50 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white"
                                 />
                             </div>
@@ -123,7 +99,7 @@ const Profile = () => {
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl p-4 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 font-bold text-lg"
                 >
                     <Save size={20} />
-                    Guardar Perfil
+                    {t('profile.save')}
                 </motion.button>
 
             </main>

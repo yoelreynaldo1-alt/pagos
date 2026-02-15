@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { LanguageProvider } from '@/context/LanguageContext';
 
 import Dashboard from '@/components/Dashboard';
 import Invoice from '@/components/Invoice';
 import Login from '@/components/Login';
 import AddIncome from '@/components/AddIncome';
 import History from '@/components/History';
-import Profile from '@/components/Profile'; // Import Profile
+import Profile from '@/components/Profile';
+import Expenses from '@/components/Expenses';
 
 // Placeholder components
-const Expenses = () => <div className="p-4"><h1>Expenses</h1></div>;
 const Settings = () => <div className="p-4"><h1>Settings</h1></div>;
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
@@ -98,23 +99,25 @@ function App() {
 
     return (
         <AuthProvider>
-            <Router>
-                <div className="min-h-screen bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white font-inter">
-                    {showInstallGuide && <InstallGuide onClose={handleCloseGuide} />}
+            <LanguageProvider>
+                <Router>
+                    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white font-inter">
+                        {showInstallGuide && <InstallGuide onClose={handleCloseGuide} />}
 
-                    <Routes>
-                        <Route path="/login" element={<Login />} />
+                        <Routes>
+                            <Route path="/login" element={<Login />} />
 
-                        <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                        <Route path="/add" element={<ProtectedRoute><AddIncome /></ProtectedRoute>} />
-                        <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
-                        <Route path="/expenses" element={<ProtectedRoute><Expenses /></ProtectedRoute>} />
-                        <Route path="/invoice" element={<ProtectedRoute><Invoice /></ProtectedRoute>} />
-                        <Route path="/settings" element={<ProtectedRoute><Profile /></ProtectedRoute>} /> {/* Using Profile as Settings */}
-                        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                    </Routes>
-                </div>
-            </Router>
+                            <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                            <Route path="/add" element={<ProtectedRoute><AddIncome /></ProtectedRoute>} />
+                            <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+                            <Route path="/expenses" element={<ProtectedRoute><Expenses /></ProtectedRoute>} />
+                            <Route path="/invoice" element={<ProtectedRoute><Invoice /></ProtectedRoute>} />
+                            <Route path="/settings" element={<ProtectedRoute><Profile /></ProtectedRoute>} /> {/* Using Profile as Settings */}
+                            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                        </Routes>
+                    </div>
+                </Router>
+            </LanguageProvider>
         </AuthProvider>
     );
 }

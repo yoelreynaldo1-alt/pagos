@@ -123,11 +123,17 @@ const AddIncome = () => {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex flex-col">
             {/* Header */}
+            import {useLanguage} from '@/context/LanguageContext';
+
+            // ... (inside component)
+            const {t} = useLanguage();
+
+            // ... (inside render)
             <header className="px-4 py-4 flex justify-between items-center bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-10 border-b border-gray-100 dark:border-slate-800">
                 <button onClick={() => navigate('/')} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
                     <X size={24} className="text-gray-900 dark:text-white" />
                 </button>
-                <h1 className="text-lg font-bold text-gray-900 dark:text-white">Registro Semanal</h1>
+                <h1 className="text-lg font-bold text-gray-900 dark:text-white">{t('addIncome.title')}</h1>
                 <div className="w-10" />
             </header>
 
@@ -137,7 +143,7 @@ const AddIncome = () => {
                 <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 space-y-4">
                     {/* Week Selector */}
                     <div>
-                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Semana del (Lunes)</label>
+                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{t('addIncome.weekOf')}</label>
                         <div className="flex items-center gap-3">
                             <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg text-blue-600 dark:text-blue-400">
                                 <Calendar size={20} />
@@ -157,13 +163,13 @@ const AddIncome = () => {
                             onClick={() => setPaymentMode('daily')}
                             className={`flex-1 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all ${paymentMode === 'daily' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500'}`}
                         >
-                            <Sun size={16} /> Por Día
+                            <Sun size={16} /> {t('addIncome.daily')}
                         </button>
                         <button
                             onClick={() => setPaymentMode('hourly')}
                             className={`flex-1 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all ${paymentMode === 'hourly' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500'}`}
                         >
-                            <Clock size={16} /> Por Hora
+                            <Clock size={16} /> {t('addIncome.hourly')}
                         </button>
                     </div>
                 </div>
@@ -171,14 +177,14 @@ const AddIncome = () => {
                 {/* Days Table */}
                 <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
                     <div className={`grid ${paymentMode === 'hourly' ? 'grid-cols-12' : 'grid-cols-12'} bg-gray-50 dark:bg-slate-900/50 p-3 border-b border-gray-100 dark:border-slate-700`}>
-                        <div className="col-span-3 text-xs font-bold text-gray-400 uppercase">Día</div>
+                        <div className="col-span-3 text-xs font-bold text-gray-400 uppercase">{t('addIncome.day')}</div>
                         {paymentMode === 'hourly' && (
                             <>
-                                <div className="col-span-3 text-center text-xs font-bold text-gray-400 uppercase">Horas</div>
-                                <div className="col-span-3 text-center text-xs font-bold text-gray-400 uppercase">Tarifa</div>
+                                <div className="col-span-3 text-center text-xs font-bold text-gray-400 uppercase">{t('addIncome.hours')}</div>
+                                <div className="col-span-3 text-center text-xs font-bold text-gray-400 uppercase">{t('addIncome.rate')}</div>
                             </>
                         )}
-                        <div className={`${paymentMode === 'hourly' ? 'col-span-3' : 'col-span-9'} text-right text-xs font-bold text-gray-400 uppercase`}>Total</div>
+                        <div className={`${paymentMode === 'hourly' ? 'col-span-3' : 'col-span-9'} text-right text-xs font-bold text-gray-400 uppercase`}>{t('addIncome.total')}</div>
                     </div>
 
                     <div className="divide-y divide-gray-100 dark:divide-slate-700">
@@ -200,7 +206,7 @@ const AddIncome = () => {
                                     <>
                                         <div className="col-span-3 px-1">
                                             <input
-                                                type="text" inputMode="decimal" placeholder="Eq: 8"
+                                                type="text" inputMode="decimal" placeholder="8"
                                                 value={day.hours} onChange={(e) => handleHourlyChange(index, 'hours', e.target.value)}
                                                 className="w-full bg-gray-50 dark:bg-slate-900/50 rounded p-1 text-center text-sm focus:outline-blue-500"
                                             />
@@ -235,7 +241,7 @@ const AddIncome = () => {
                     <div className="bg-blue-50 dark:bg-blue-900/10 p-4 flex justify-between items-center border-t border-blue-100 dark:border-blue-900/20">
                         <div className="flex items-center gap-2 text-blue-800 dark:text-blue-300">
                             <Calculator size={20} />
-                            <span className="font-bold">Total Semanal</span>
+                            <span className="font-bold">{t('addIncome.weeklyTotal')}</span>
                         </div>
                         <span className="text-xl font-extrabold text-blue-600 dark:text-blue-400">
                             ${total.toFixed(2)}
@@ -251,7 +257,7 @@ const AddIncome = () => {
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl p-4 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 font-bold text-lg"
                 >
                     <Save size={20} />
-                    Guardar en Base de Datos
+                    {t('addIncome.save')}
                 </motion.button>
 
             </main>

@@ -39,13 +39,13 @@ const History = () => {
             const updated = transactions.filter(t => t.id !== id);
             setTransactions(updated);
         } else {
-            alert('Error al eliminar');
+            alert(t('history.deleteError'));
         }
     };
 
     const handleEdit = (transaction: any) => {
         // Simple "Modify" for simulation
-        const newAmount = prompt(`Editar monto para ${format(transaction.dateObj, 'eeee d', { locale: es })}:`, transaction.amount);
+        const newAmount = prompt(t('history.editAmountPrompt', { date: format(transaction.dateObj, 'eeee d', { locale: es }) }), transaction.amount);
         if (newAmount && !isNaN(parseFloat(newAmount))) {
             const updated = transactions.map(t => {
                 if (t.id === transaction.id) {
@@ -75,14 +75,14 @@ const History = () => {
                 >
                     <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
                 </button>
-                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Historial</h1>
+                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">{t('history.title')}</h1>
                 <div className="w-10" />
             </header>
 
             <main className="px-4 pt-6 space-y-6">
                 {transactions.length === 0 && !loading && (
                     <div className="text-center text-gray-400 mt-10">
-                        <p>No hay registros aún.</p>
+                        <p>{t('history.noRecords')}</p>
                     </div>
                 )}
 
@@ -111,7 +111,7 @@ const History = () => {
                                                     {format(item.dateObj, 'eeee', { locale: es })}
                                                 </p>
                                                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                    {item.payment_mode === 'hourly' ? `${item.hours} hrs @ $${item.rate}` : 'Pago Diario'}
+                                                    {item.payment_mode === 'hourly' ? `${item.hours} hrs @ $${item.rate}` : t('history.dailyPayment')}
                                                 </p>
                                             </div>
                                         </div>

@@ -1,9 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Printer, Share2 } from 'lucide-react';
 import { format, startOfWeek, addDays } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { useEffect, useState } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 
 const Invoice = () => {
+    const { t, language } = useLanguage();
     const navigate = useNavigate();
     const currentDate = new Date();
     // Ensure accurate week start (Monday)
@@ -28,7 +31,7 @@ const Invoice = () => {
     const items = Array.from({ length: 5 }).map((_, index) => {
         const date = addDays(startOfCurrentWeek, index);
         return {
-            day: format(date, 'EEEE'), // Monday, Tuesday...
+            day: format(date, 'EEEE', { locale: language === 'es' ? es : undefined }), // Lunes, Martes...
             date: format(date, 'MM/dd/yy'),
             amount: 145.00
         };
@@ -73,23 +76,23 @@ const Invoice = () => {
             `${item.day} (${item.date}): $${item.amount.toFixed(2)}`
         ).join('\n');
 
-        // 2. Construct the full email body in English
-        const subject = `Invoice #${invoiceData.number} - ${profile.name}`;
+        // 2. Construct the full email body
+        const subject = `${t('invoice.title')} #${invoiceData.number} - ${profile.name}`;
 
-        const bodyContent = `INVOICE #${invoiceData.number}
-Date: ${invoiceData.date}
+        const bodyContent = `${t('invoice.title').toUpperCase()} #${invoiceData.number}
+${t('invoice.date')}: ${invoiceData.date}
 
-DRIVER DETAILS:
-Name: ${profile.name}
-Address: ${profile.address}
-City: ${profile.city}
+${t('invoice.billTo').toUpperCase()}:
+${t('profile.name')}: ${profile.name}
+${t('profile.address')}: ${profile.address}
+${t('profile.city')}: ${profile.city}
 
-INVOICE ITEMS:
+${t('invoice.weekOf').toUpperCase()}:
 ${itemsList}
 
-TOTAL: $${total.toFixed(2)}
+${t('invoice.total').toUpperCase()}: $${total.toFixed(2)}
 
-Thank you,
+${t('invoice.footer')}
 ${profile.name}`;
 
         // 3. Encode for URL
@@ -112,7 +115,7 @@ ${profile.name}`;
                     className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
                 >
                     <ArrowLeft size={20} />
-                    <span className="font-medium">Back to Dashboard</span>
+                    <span className="font-medium">{t('dashboard.nav.home')}</span>
                 </button>
                 <div className="flex gap-2">
                     <button
@@ -136,12 +139,12 @@ ${profile.name}`;
             {showEmailModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 print:hidden">
                     <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">Enviar Factura</h3>
-                        <p className="text-sm text-gray-500 mb-4">Ingresa el correo de la compañía para enviar la factura.</p>
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">{t('invoice.sendEmail')}</h3>
+                        <p className="text-sm text-gray-500 mb-4">{t('invoice.billTo')}</p> {/* Reusing billTo for "To:" roughly or just standard text */}
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Para:</label>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Email:</label>
                                 <input
                                     type="email"
                                     value={recipientEmail}
@@ -157,13 +160,13 @@ ${profile.name}`;
                                     onClick={() => setShowEmailModal(false)}
                                     className="flex-1 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
                                 >
-                                    Cancelar
+                                    Cancel
                                 </button>
                                 <button
                                     onClick={handleSendEmail}
                                     className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30"
                                 >
-                                    Enviar
+                                    Send
                                 </button>
                             </div>
                         </div>
@@ -177,7 +180,7 @@ ${profile.name}`;
                 {/* Header */}
                 <div className="flex justify-between items-start border-b-2 border-blue-600 pb-6 mb-8">
                     <div>
-                        <h1 className="text-3xl font-extrabold text-blue-700 tracking-tight uppercase">Invoice</h1>
+                        <h1 className="text-3xl font-extrabold text-blue-700 tracking-tight uppercase">{t('invoice.title')}</h1>
                     </div>
                     <div className="text-right">
                         <div className="text-xs text-gray-400 uppercase font-bold tracking-wider">Invoice No.</div>
@@ -190,11 +193,11 @@ ${profile.name}`;
                     <div>
                         <h4 className="text-xs font-bold text-gray-400 uppercase mb-2">SOLD TO</h4>
                         <div className="text-lg font-bold text-gray-900">{invoiceData.company.name}</div>
-                        <div className="text-xs text-gray-400 uppercase font-bold tracking-wider mt-4">DATE</div>
+                        <div className="text-xs text-gray-400 uppercase font-bold tracking-wider mt-4">{t('invoice.date').toUpperCase()}</div>
                         <div className="text-gray-700 font-medium">{invoiceData.date}</div>
                     </div>
                     <div>
-                        <h4 className="text-xs font-bold text-gray-400 uppercase mb-2">SHIP TO (DRIVER)</h4>
+                        <h4 className="text-xs font-bold text-gray-400 uppercase mb-2">{t('invoice.billTo').toUpperCase()}</h4>
                         <div className="text-lg font-bold text-gray-900">{invoiceData.driver.name}</div>
                         <div className="text-gray-600">{invoiceData.driver.address}</div>
                         <div className="text-gray-600">{invoiceData.driver.city}</div>
@@ -208,9 +211,9 @@ ${profile.name}`;
                 <table className="w-full mb-8">
                     <thead>
                         <tr className="border-b border-gray-200">
-                            <th className="text-left py-3 px-4 font-bold text-gray-700 bg-gray-50/50">Description</th>
-                            <th className="text-center py-3 px-4 font-bold text-gray-700 bg-gray-50/50">Date</th>
-                            <th className="text-right py-3 px-4 font-bold text-gray-700 bg-gray-50/50">Amount</th>
+                            <th className="text-left py-3 px-4 font-bold text-gray-700 bg-gray-50/50">{t('invoice.description')}</th>
+                            <th className="text-center py-3 px-4 font-bold text-gray-700 bg-gray-50/50">{t('invoice.date')}</th>
+                            <th className="text-right py-3 px-4 font-bold text-gray-700 bg-gray-50/50">{t('invoice.amount')}</th>
                         </tr>
                     </thead>
                     <tbody className="text-gray-700">
@@ -228,7 +231,7 @@ ${profile.name}`;
                 <div className="flex justify-end pt-4">
                     <div className="w-1/2 md:w-1/3">
                         <div className="flex justify-between items-center py-4 border-t border-gray-200">
-                            <span className="text-xl font-bold text-gray-500 uppercase tracking-wider">TOTAL</span>
+                            <span className="text-xl font-bold text-gray-500 uppercase tracking-wider">{t('invoice.total')}</span>
                             <span className="text-3xl font-extrabold text-blue-600">${total.toFixed(2)}</span>
                         </div>
                     </div>
@@ -236,7 +239,7 @@ ${profile.name}`;
 
                 {/* Footer */}
                 <div className="mt-12 pt-8 border-t-2 border-gray-100 text-center">
-                    <p className="text-gray-500 text-xs font-medium">Thank you for your business.</p>
+                    <p className="text-gray-500 text-xs font-medium">{t('invoice.footer')}</p>
                     <p className="text-[10px] text-gray-300 mt-2">v2.1 - {format(new Date(), 'MM/dd/yy HH:mm')}</p>
                 </div>
             </div>
