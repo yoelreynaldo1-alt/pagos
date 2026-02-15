@@ -1,11 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Printer, Share2 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, startOfWeek, addDays } from 'date-fns';
 import { useEffect, useState } from 'react';
 
 const Invoice = () => {
     const navigate = useNavigate();
     const currentDate = new Date();
+    // Ensure accurate week start (Monday)
+    const startOfCurrentWeek = startOfWeek(currentDate, { weekStartsOn: 1 });
     const formattedDate = format(currentDate, 'MM/dd/yy');
 
     const [profile, setProfile] = useState({
@@ -22,17 +24,18 @@ const Invoice = () => {
         }
     }, []);
 
-    // Mock Items for now (could connect to DB simulates later)
-    const items = [
-        { day: 'Monday', date: '01/13/26', amount: 145.00 },
-        { day: 'Tuesday', date: '01/14/26', amount: 145.00 },
-        { day: 'Wednesday', date: '01/15/26', amount: 145.00 },
-        { day: 'Thursday', date: '01/16/26', amount: 145.00 },
-        { day: 'Friday', date: '01/17/26', amount: 145.00 },
-    ];
+    // Dynamically generate items for the current week (Mon-Fri)
+    const items = Array.from({ length: 5 }).map((_, index) => {
+        const date = addDays(startOfCurrentWeek, index);
+        return {
+            day: format(date, 'EEEE'), // Monday, Tuesday...
+            date: format(date, 'MM/dd/yy'),
+            amount: 145.00
+        };
+    });
 
     const invoiceData = {
-        number: Math.floor(1000 + Math.random() * 9000), // Random 4-digit ID
+        number: Math.floor(1000 + Math.random() * 9000),
         date: formattedDate,
         company: {
             name: "Elite Transport Care",
@@ -54,10 +57,8 @@ const Invoice = () => {
 
     const [showEmailModal, setShowEmailModal] = useState(false);
     const [recipientEmail, setRecipientEmail] = useState('');
-    const [sendMode, setSendMode] = useState<'gmail' | 'default'>('default');
 
-    const handleOpenEmailModal = (mode: 'gmail' | 'default') => {
-        setSendMode(mode);
+    const handleOpenEmailModal = () => {
         setShowEmailModal(true);
     };
 
@@ -95,17 +96,9 @@ ${profile.name}`;
         const encSubject = encodeURIComponent(subject);
         const encBody = encodeURIComponent(bodyContent);
 
-        let url = '';
-
-        if (sendMode === 'gmail') {
-            // Gmail web interface
-            url = `https://mail.google.com/mail/?view=cm&fs=1&to=${recipientEmail}&su=${encSubject}&body=${encBody}`;
-            window.open(url, '_blank', 'noopener,noreferrer');
-        } else {
-            // Default mailto
-            url = `mailto:${recipientEmail}?subject=${encSubject}&body=${encBody}`;
-            window.location.href = url;
-        }
+        // Gmail web interface
+        const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${recipientEmail}&su=${encSubject}&body=${encBody}`;
+        window.open(url, '_blank', 'noopener,noreferrer');
 
         setShowEmailModal(false);
     };
@@ -130,13 +123,12 @@ ${profile.name}`;
                         <span className="hidden sm:inline">PDF</span>
                     </button>
                     <button
-                        onClick={() => handleOpenEmailModal('gmail')}
+                        onClick={handleOpenEmailModal}
                         className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-red-700 transition-colors"
                     >
                         <Share2 size={20} />
                         <span>Gmail</span>
                     </button>
-
                 </div>
             </div>
 
