@@ -4,10 +4,12 @@ import { ArrowLeft, User, MapPin, Building, Mail, Save, Download } from 'lucide-
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
 import { useInstallPrompt } from '@/context/InstallPromptContext';
+import { useAuth } from '@/context/AuthContext';
 
 const Profile = () => {
     const { t } = useLanguage();
     const { triggerInstallPrompt } = useInstallPrompt();
+    const { user, updateUserProfile } = useAuth(); // Changed hook usage
     const navigate = useNavigate();
 
     // State for profile data
@@ -18,13 +20,17 @@ const Profile = () => {
         email: ''
     });
 
-    // Load profile from local storage on mount
+    // Load profile from AuthContext (Firestore data)
     useEffect(() => {
-        const saved = localStorage.getItem('user-profile');
-        if (saved) {
-            setProfile(JSON.parse(saved));
+        if (user) {
+            setProfile({
+                name: user.name || '',
+                address: user.address || '',
+                city: user.city || '',
+                email: user.email || ''
+            });
         }
-    }, []);
+    }, [user]);
 
     // Handle input changes
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,10 +42,14 @@ const Profile = () => {
     };
 
     // Handle save
-    const handleSave = () => {
-        localStorage.setItem('user-profile', JSON.stringify(profile));
-        alert(t('addIncome.saved') || "Profile Saved"); // Fallback text
-        // Optional: navigate back or show success message
+    const handleSave = async () => {
+        try {
+            await updateUserProfile(profile);
+            alert(t('addIncome.saved') || "Profile Updated");
+        } catch (error) {
+            console.error("Error updating profile:", error);
+            alert("Error saving profile");
+        }
     };
 
     return (
