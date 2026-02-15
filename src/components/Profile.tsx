@@ -1,10 +1,45 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, User, MapPin, Building, Mail, Save } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
 
-// ... (component start)
 const Profile = () => {
     const { t } = useLanguage();
     const navigate = useNavigate();
-    // ...
+
+    // State for profile data
+    const [profile, setProfile] = useState({
+        name: '',
+        address: '',
+        city: '',
+        email: ''
+    });
+
+    // Load profile from local storage on mount
+    useEffect(() => {
+        const saved = localStorage.getItem('user-profile');
+        if (saved) {
+            setProfile(JSON.parse(saved));
+        }
+    }, []);
+
+    // Handle input changes
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setProfile(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    // Handle save
+    const handleSave = () => {
+        localStorage.setItem('user-profile', JSON.stringify(profile));
+        alert(t('addIncome.saved') || "Profile Saved"); // Fallback text
+        // Optional: navigate back or show success message
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pb-20">
             {/* Header */}

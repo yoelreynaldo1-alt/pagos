@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Filter, Trash2, Edit2, Truck, Calendar } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS } from 'date-fns/locale';
 import { supabase } from '@/supabaseClient';
+import { useLanguage } from '@/context/LanguageContext';
 
 const History = () => {
+    const { t, language } = useLanguage();
     const navigate = useNavigate();
     const [transactions, setTransactions] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -30,7 +32,7 @@ const History = () => {
     }, []);
 
     const handleDelete = async (id: string) => {
-        if (!confirm('¿Estás seguro de eliminar este registro?')) return;
+        if (!confirm(t('history.deleteConfirm'))) return;
 
         const { error } = await supabase.from('incomes').delete().eq('id', id);
 
@@ -39,13 +41,14 @@ const History = () => {
             const updated = transactions.filter(t => t.id !== id);
             setTransactions(updated);
         } else {
-            alert(t('history.deleteError'));
+            alert(t('addIncome.error'));
         }
     };
 
     const handleEdit = (transaction: any) => {
         // Simple "Modify" for simulation
-        const newAmount = prompt(t('history.editAmountPrompt', { date: format(transaction.dateObj, 'eeee d', { locale: es }) }), transaction.amount);
+        const dateLocale = language === 'es' ? es : enUS;
+        const newAmount = prompt(t('history.editAmountPrompt', { date: format(transaction.dateObj, 'eeee d', { locale: dateLocale }) }), transaction.amount);
         if (newAmount && !isNaN(parseFloat(newAmount))) {
             const updated = transactions.map(t => {
                 if (t.id === transaction.id) {
@@ -61,7 +64,8 @@ const History = () => {
 
     // Grouping
     const grouped = transactions.reduce((acc, t) => {
-        const dateStr = format(t.dateObj, 'MMMM d, yyyy', { locale: es });
+        const dateLocale = language === 'es' ? es : enUS;
+        const dateStr = format(t.dateObj, 'MMMM d, yyyy', { locale: dateLocale });
         (acc[dateStr] = acc[dateStr] || []).push(t);
         return acc;
     }, {} as Record<string, any[]>);
@@ -108,7 +112,7 @@ const History = () => {
                                             </div>
                                             <div>
                                                 <p className="font-medium text-gray-900 dark:text-white capitalize">
-                                                    {format(item.dateObj, 'eeee', { locale: es })}
+                                                    {format(item.dateObj, 'eeee', { locale: language === 'es' ? es : enUS })}
                                                 </p>
                                                 <p className="text-xs text-gray-500 dark:text-gray-400">
                                                     {item.payment_mode === 'hourly' ? `${item.hours} hrs @ $${item.rate}` : t('history.dailyPayment')}

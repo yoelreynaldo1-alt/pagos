@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { X, Calendar, Save, Calculator, Clock, Sun } from 'lucide-react';
 import { format, startOfWeek, addDays, parseISO } from 'date-fns';
 import { supabase } from '@/supabaseClient';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface DayEntry {
     name: string;
@@ -16,6 +17,7 @@ interface DayEntry {
 type PaymentMode = 'daily' | 'hourly';
 
 const AddIncome = () => {
+    const { t } = useLanguage();
     const navigate = useNavigate();
 
     // Default to current week's Monday
@@ -105,7 +107,7 @@ const AddIncome = () => {
             }));
 
         if (entriesToSave.length === 0) {
-            alert("No hay montos para guardar.");
+            alert(t('addIncome.error')); // Using t() here too if possible
             return;
         }
 
@@ -113,7 +115,7 @@ const AddIncome = () => {
 
         if (error) {
             console.error(error);
-            alert("Error al guardar");
+            alert(t('addIncome.error'));
         } else {
             console.log("Saved:", entriesToSave);
             navigate('/');
@@ -123,12 +125,6 @@ const AddIncome = () => {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex flex-col">
             {/* Header */}
-            import {useLanguage} from '@/context/LanguageContext';
-
-            // ... (inside component)
-            const {t} = useLanguage();
-
-            // ... (inside render)
             <header className="px-4 py-4 flex justify-between items-center bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-10 border-b border-gray-100 dark:border-slate-800">
                 <button onClick={() => navigate('/')} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
                     <X size={24} className="text-gray-900 dark:text-white" />
