@@ -32,7 +32,7 @@ const Invoice = () => {
     ];
 
     const invoiceData = {
-        number: Math.floor(Math.random() * 10000), // Random invoice number for sim
+        number: Math.floor(1000 + Math.random() * 9000), // Random 4-digit ID
         date: formattedDate,
         company: {
             name: "Elite Transport Care",
@@ -136,13 +136,7 @@ ${profile.name}`;
                         <Share2 size={20} />
                         <span>Gmail</span>
                     </button>
-                    <button
-                        onClick={() => handleOpenEmailModal('default')}
-                        className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-green-700 transition-colors"
-                    >
-                        <Share2 size={20} />
-                        <span>Otro Correo</span>
-                    </button>
+
                 </div>
             </div>
 
