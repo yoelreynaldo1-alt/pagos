@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { X, Calendar, Save, Calculator, Clock, Sun } from 'lucide-react';
 import { format, startOfWeek, addDays, parseISO } from 'date-fns';
-import { supabase } from '@/supabaseClient';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
+import { doc, collection, addDoc } from 'firebase/firestore'; // Firebase imports
+import { db } from '@/firebase';
 
 interface DayEntry {
     name: string;
@@ -12,12 +14,15 @@ interface DayEntry {
     amount: string;
     hours?: string;
     rate?: string;
+    overtimeHours?: string;
+    overtimeRate?: string;
 }
 
 type PaymentMode = 'daily' | 'hourly';
 
 const AddIncome = () => {
     const { t } = useLanguage();
+    const { user } = useAuth();
     const navigate = useNavigate();
 
     // Default to current week's Monday
@@ -46,7 +51,9 @@ const AddIncome = () => {
                 date: format(date, 'yyyy-MM-dd'),
                 amount: '',
                 hours: '',
-                rate: ''
+                rate: '',
+                overtimeHours: '',
+                overtimeRate: ''
             });
         }
         setDays(newDays);
@@ -68,17 +75,24 @@ const AddIncome = () => {
         setDays(newDays);
     };
 
-    const handleHourlyChange = (index: number, field: 'hours' | 'rate', value: string) => {
+    const handleHourlyChange = (index: number, field: keyof DayEntry, value: string) => {
         if (!/^\d*\.?\d{0,2}$/.test(value)) return;
 
         const newDays = [...days];
         newDays[index] = { ...newDays[index], [field]: value };
 
-        // Auto-calc amount if both exist
+        // Auto-calc amount
         const hrs = parseFloat(newDays[index].hours || '0');
         const rate = parseFloat(newDays[index].rate || '0');
-        if (hrs && rate) {
-            newDays[index].amount = (hrs * rate).toFixed(2);
+        const ovtHrs = parseFloat(newDays[index].overtimeHours || '0');
+        const ovtRate = parseFloat(newDays[index].overtimeRate || '0');
+
+        const regularPay = hrs * rate;
+        const overtimePay = ovtHrs * ovtRate;
+        const totalPay = regularPay + overtimePay;
+
+        if (totalPay > 0) {
+            newDays[index].amount = totalPay.toFixed(2);
         } else {
             newDays[index].amount = '';
         }
@@ -93,32 +107,44 @@ const AddIncome = () => {
     };
 
     const handleSubmit = async () => {
+        if (!user) {
+            alert("Debes iniciar sesión para guardar.");
+            return;
+        }
+
         // Filter out days with no amount
         const entriesToSave = days
             .filter(d => parseFloat(d.amount) > 0)
             .map(d => ({
+                userId: user.uid, // Start linking to user
                 date: d.date,
                 amount: parseFloat(d.amount),
                 type: 'income',
                 payment_mode: paymentMode,
                 hours: d.hours ? parseFloat(d.hours) : null,
                 rate: d.rate ? parseFloat(d.rate) : null,
+                overtimeHours: d.overtimeHours ? parseFloat(d.overtimeHours) : null,
+                overtimeRate: d.overtimeRate ? parseFloat(d.overtimeRate) : null,
                 created_at: new Date().toISOString()
             }));
 
         if (entriesToSave.length === 0) {
-            alert(t('addIncome.error')); // Using t() here too if possible
+            alert(t('addIncome.error') || "No hay datos para guardar");
             return;
         }
 
-        const { error } = await supabase.from('incomes').insert(entriesToSave);
-
-        if (error) {
-            console.error(error);
-            alert(t('addIncome.error'));
-        } else {
-            console.log("Saved:", entriesToSave);
+        try {
+            // Save to Firebase Firestore 'incomes' collection
+            const incomesRef = collection(db, 'incomes');
+            // Batch write or simple loop for now (loop is safer for small batches without atomic requirement)
+            for (const entry of entriesToSave) {
+                await addDoc(incomesRef, entry);
+            }
+            console.log("Saved to Firestore:", entriesToSave);
             navigate('/');
+        } catch (error) {
+            console.error("Error saving to Firestore:", error);
+            alert("Error al guardar en la base de datos.");
         }
     };
 
@@ -133,7 +159,7 @@ const AddIncome = () => {
                 <div className="w-10" />
             </header>
 
-            <main className="flex-1 px-4 py-6 max-w-lg mx-auto w-full space-y-6">
+            <main className="flex-1 px-4 py-6 max-w-2xl mx-auto w-full space-y-6">
 
                 {/* Controls Card */}
                 <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 space-y-4">
@@ -172,15 +198,17 @@ const AddIncome = () => {
 
                 {/* Days Table */}
                 <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
-                    <div className={`grid ${paymentMode === 'hourly' ? 'grid-cols-12' : 'grid-cols-12'} bg-gray-50 dark:bg-slate-900/50 p-3 border-b border-gray-100 dark:border-slate-700`}>
-                        <div className="col-span-3 text-xs font-bold text-gray-400 uppercase">{t('addIncome.day')}</div>
+                    <div className={`grid ${paymentMode === 'hourly' ? 'grid-cols-12' : 'grid-cols-12'} bg-gray-50 dark:bg-slate-900/50 p-3 border-b border-gray-100 dark:border-slate-700 gap-2`}>
+                        <div className="col-span-2 text-xs font-bold text-gray-400 uppercase">{t('addIncome.day')}</div>
                         {paymentMode === 'hourly' && (
                             <>
-                                <div className="col-span-3 text-center text-xs font-bold text-gray-400 uppercase">{t('addIncome.hours')}</div>
-                                <div className="col-span-3 text-center text-xs font-bold text-gray-400 uppercase">{t('addIncome.rate')}</div>
+                                <div className="col-span-2 text-center text-xs font-bold text-gray-400 uppercase leading-none">Hrs<br />Reg</div>
+                                <div className="col-span-2 text-center text-xs font-bold text-gray-400 uppercase leading-none">Tarifa<br />Reg</div>
+                                <div className="col-span-2 text-center text-xs font-bold text-blue-400 uppercase leading-none">Hrs<br />Extra</div>
+                                <div className="col-span-2 text-center text-xs font-bold text-blue-400 uppercase leading-none">Tarifa<br />Extra</div>
                             </>
                         )}
-                        <div className={`${paymentMode === 'hourly' ? 'col-span-3' : 'col-span-9'} text-right text-xs font-bold text-gray-400 uppercase`}>{t('addIncome.total')}</div>
+                        <div className={`${paymentMode === 'hourly' ? 'col-span-2' : 'col-span-10'} text-right text-xs font-bold text-gray-400 uppercase`}>{t('addIncome.total')}</div>
                     </div>
 
                     <div className="divide-y divide-gray-100 dark:divide-slate-700">
@@ -190,37 +218,51 @@ const AddIncome = () => {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.05 }}
-                                className={`grid ${paymentMode === 'hourly' ? 'grid-cols-12' : 'grid-cols-12'} items-center p-3 hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors`}
+                                className={`grid ${paymentMode === 'hourly' ? 'grid-cols-12' : 'grid-cols-12'} items-center p-3 hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors gap-2`}
                             >
                                 {/* Name */}
-                                <div className="col-span-3 font-medium text-gray-900 dark:text-white flex flex-col">
-                                    <span>{day.name}</span>
+                                <div className="col-span-2 font-medium text-gray-900 dark:text-white flex flex-col">
+                                    <span className="truncate">{day.name.substring(0, 3)}</span>
                                     <span className="text-[10px] text-gray-400">{format(parseISO(day.date), 'dd/MM')}</span>
                                 </div>
 
                                 {paymentMode === 'hourly' ? (
                                     <>
-                                        <div className="col-span-3 px-1">
+                                        <div className="col-span-2">
                                             <input
-                                                type="text" inputMode="decimal" placeholder="8"
+                                                type="text" inputMode="decimal" placeholder="0"
                                                 value={day.hours} onChange={(e) => handleHourlyChange(index, 'hours', e.target.value)}
-                                                className="w-full bg-gray-50 dark:bg-slate-900/50 rounded p-1 text-center text-sm focus:outline-blue-500"
+                                                className="w-full bg-gray-50 dark:bg-slate-900/50 rounded p-1 text-center text-sm focus:outline-blue-500 border border-transparent focus:border-blue-500"
                                             />
                                         </div>
-                                        <div className="col-span-3 px-1">
+                                        <div className="col-span-2">
                                             <input
                                                 type="text" inputMode="decimal" placeholder="$"
                                                 value={day.rate} onChange={(e) => handleHourlyChange(index, 'rate', e.target.value)}
-                                                className="w-full bg-gray-50 dark:bg-slate-900/50 rounded p-1 text-center text-sm focus:outline-blue-500"
+                                                className="w-full bg-gray-50 dark:bg-slate-900/50 rounded p-1 text-center text-sm focus:outline-blue-500 border border-transparent focus:border-blue-500"
                                             />
                                         </div>
-                                        <div className="col-span-3 text-right font-bold text-gray-900 dark:text-white">
-                                            ${day.amount || '0.00'}
+                                        <div className="col-span-2">
+                                            <input
+                                                type="text" inputMode="decimal" placeholder="0"
+                                                value={day.overtimeHours} onChange={(e) => handleHourlyChange(index, 'overtimeHours', e.target.value)}
+                                                className="w-full bg-blue-50 dark:bg-blue-900/20 rounded p-1 text-center text-sm text-blue-600 focus:outline-blue-500 border border-blue-100 dark:border-blue-800"
+                                            />
+                                        </div>
+                                        <div className="col-span-2">
+                                            <input
+                                                type="text" inputMode="decimal" placeholder="$"
+                                                value={day.overtimeRate} onChange={(e) => handleHourlyChange(index, 'overtimeRate', e.target.value)}
+                                                className="w-full bg-blue-50 dark:bg-blue-900/20 rounded p-1 text-center text-sm text-blue-600 focus:outline-blue-500 border border-blue-100 dark:border-blue-800"
+                                            />
+                                        </div>
+                                        <div className="col-span-2 text-right font-bold text-gray-900 dark:text-white text-sm">
+                                            ${day.amount || '0'}
                                         </div>
                                     </>
                                 ) : (
                                     /* Daily Mode Input */
-                                    <div className="col-span-9 relative">
+                                    <div className="col-span-10 relative">
                                         <span className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
                                         <input
                                             type="text" inputMode="decimal" placeholder="0.00"
