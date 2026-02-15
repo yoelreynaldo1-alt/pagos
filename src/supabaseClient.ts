@@ -33,7 +33,8 @@ export const supabase = {
                 // Mock update logic would go here
                 return { data: null, error: null };
             },
-            delete: async () => {
+        },
+            delete: () => {
                 // Return a builder that expects .eq()
                 return {
                     eq: async (column: string, value: any) => {
@@ -46,15 +47,15 @@ export const supabase = {
                     }
                 };
             }
-        }
-    },
+    }
+},
     auth: {
         getUser: async () => {
             const user = JSON.parse(localStorage.getItem('sb-session-mock') || 'null');
-            return { data: { user }, error: null };
+return { data: { user }, error: null };
         },
-        signOut: async () => {
-            localStorage.removeItem('sb-session-mock');
-        }
+signOut: async () => {
+    localStorage.removeItem('sb-session-mock');
+}
     }
 };
