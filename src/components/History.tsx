@@ -96,7 +96,7 @@ const History = () => {
                     </div>
                 )}
 
-                {Object.entries(grouped).map(([date, items]) => (
+                {Object.entries(grouped).map(([date, items]: [string, any[]]) => (
                     <div key={date} className="space-y-3">
                         <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide px-2 capitalize">{date}</h2>
                         <div className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm border border-gray-100 dark:border-slate-700">
