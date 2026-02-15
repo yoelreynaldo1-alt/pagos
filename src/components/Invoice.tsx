@@ -63,16 +63,37 @@ const Invoice = () => {
 
     const handleSendEmail = () => {
         if (!recipientEmail) {
-            alert("Por favor, ingresa el correo de la compañía.");
+            alert("Please enter the company email.");
             return;
         }
 
-        const subject = `Invoice ${invoiceData.number} - ${profile.name}`;
-        const body = `Adjunto la factura correspondiente a la semana.\n\nGracias,\n${profile.name}`;
+        // 1. Format the items list
+        const itemsList = invoiceData.items.map(item =>
+            `${item.day} (${item.date}): $${item.amount.toFixed(2)}`
+        ).join('\n');
 
-        // Encode components
+        // 2. Construct the full email body in English
+        const subject = `Invoice #${invoiceData.number} - ${profile.name}`;
+
+        const bodyContent = `INVOICE #${invoiceData.number}
+Date: ${invoiceData.date}
+
+DRIVER DETAILS:
+Name: ${profile.name}
+Address: ${profile.address}
+City: ${profile.city}
+
+INVOICE ITEMS:
+${itemsList}
+
+TOTAL: $${total.toFixed(2)}
+
+Thank you,
+${profile.name}`;
+
+        // 3. Encode for URL
         const encSubject = encodeURIComponent(subject);
-        const encBody = encodeURIComponent(body);
+        const encBody = encodeURIComponent(bodyContent);
 
         let url = '';
 
