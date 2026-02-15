@@ -35,7 +35,8 @@ export const translations = {
             title: "Historial",
             noRecords: "No hay registros aún.",
             deleteConfirm: "¿Estás seguro de eliminar este registro?",
-            dailyPayment: "Pago Diario"
+            dailyPayment: "Pago Diario",
+            editAmountPrompt: "Editar monto"
         },
         profile: {
             title: "Perfil del Conductor",
@@ -111,7 +112,8 @@ export const translations = {
             title: "History",
             noRecords: "No records yet.",
             deleteConfirm: "Are you sure you want to delete this record?",
-            dailyPayment: "Daily Payment"
+            dailyPayment: "Daily Payment",
+            editAmountPrompt: "Edit amount"
         },
         profile: {
             title: "Driver Profile",

@@ -45,10 +45,14 @@ const History = () => {
         }
     };
 
+
     const handleEdit = (transaction: any) => {
         // Simple "Modify" for simulation
         const dateLocale = language === 'es' ? es : enUS;
-        const newAmount = prompt(t('history.editAmountPrompt', { date: format(transaction.dateObj, 'eeee d', { locale: dateLocale }) }), transaction.amount);
+        const dateStr = format(transaction.dateObj, 'eeee d', { locale: dateLocale });
+        const promptMsg = `${t('history.editAmountPrompt')} (${dateStr})`;
+
+        const newAmount = prompt(promptMsg, transaction.amount);
         if (newAmount && !isNaN(parseFloat(newAmount))) {
             const updated = transactions.map(t => {
                 if (t.id === transaction.id) {
