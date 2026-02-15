@@ -1,18 +1,31 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
 
 import Dashboard from '@/components/Dashboard';
 import Invoice from '@/components/Invoice';
-
+import Login from '@/components/Login';
 import AddIncome from '@/components/AddIncome';
-
 import History from '@/components/History';
 
-// Placeholder components - In a real setup these would be imported from generated files
+// Placeholder components
 const Expenses = () => <div className="p-4"><h1>Expenses</h1></div>;
 const Settings = () => <div className="p-4"><h1>Settings</h1></div>;
 
+const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+    const { user, loading } = useAuth();
+    if (loading) return null; // Or a spinner
+    if (!user) return <Navigate to="/login" />;
+    return children;
+};
+
 const InstallGuide = ({ onClose }: { onClose: () => void }) => {
+    /* ... (Existing InstallGuide code kept same, omitted for brevity if unmodified, but since this wraps the file content I should keep it or import it. 
+       For this tool, I will just re-paste the component logic if it was short, or assume I can't partial replace nicely here since the structure changes significantly.
+       Actually, I can keep the InstallGuide component if I just change the App component part. 
+       But I need to wrap App in AuthProvider.
+       Let's stick to replacing the logic inside App and adding the wrapping. */
+    // ... (This component code is long, I will assume I can just paste the relevant part in replacement content essentially)
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
             <div className="bg-white/90 dark:bg-slate-900/90 w-full max-w-md rounded-2xl p-6 shadow-2xl backdrop-blur-md border border-white/20">
@@ -22,7 +35,6 @@ const InstallGuide = ({ onClose }: { onClose: () => void }) => {
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
                     </button>
                 </div>
-
                 <div className="space-y-6">
                     <div className="flex items-start gap-4">
                         <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg text-blue-600 dark:text-blue-400">
@@ -33,7 +45,6 @@ const InstallGuide = ({ onClose }: { onClose: () => void }) => {
                             <p className="text-sm text-gray-500 dark:text-gray-400">Usually at the bottom of your screen.</p>
                         </div>
                     </div>
-
                     <div className="flex items-start gap-4">
                         <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg text-blue-600 dark:text-blue-400">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" /><path d="M8 12h8" /><path d="M12 8v8" /></svg>
@@ -43,7 +54,6 @@ const InstallGuide = ({ onClose }: { onClose: () => void }) => {
                             <p className="text-sm text-gray-500 dark:text-gray-400">Scroll down or swipe to find it using the plus icon.</p>
                         </div>
                     </div>
-
                     <div className="flex items-start gap-4">
                         <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg text-blue-600 dark:text-blue-400">
                             <span className="font-bold text-lg">Add</span>
@@ -54,7 +64,6 @@ const InstallGuide = ({ onClose }: { onClose: () => void }) => {
                         </div>
                     </div>
                 </div>
-
                 <div className="mt-8 p-4 bg-gray-50 dark:bg-slate-800 rounded-xl flex justify-center">
                     <div className="flex flex-col items-center">
                         <div className="w-16 h-16 bg-blue-600 rounded-2xl shadow-lg mb-2 flex items-center justify-center text-white font-bold text-2xl">W</div>
@@ -69,22 +78,15 @@ const InstallGuide = ({ onClose }: { onClose: () => void }) => {
 function App() {
     const [showInstallGuide, setShowInstallGuide] = useState(false);
 
-
     useEffect(() => {
         // Basic detection for iOS
         const isIosDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-
-
         // Check if running in standalone mode (PWA)
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
 
-        // Show guide if on iOS and NOT standalone
         if (isIosDevice && !isStandalone) {
-            // Only show once per session or use localstorage to track dismiss
             const hasSeenGuide = sessionStorage.getItem('hasSeenInstallGuide');
-            if (!hasSeenGuide) {
-                setShowInstallGuide(true);
-            }
+            if (!hasSeenGuide) setShowInstallGuide(true);
         }
     }, []);
 
@@ -94,20 +96,24 @@ function App() {
     };
 
     return (
-        <Router>
-            <div className="min-h-screen bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white font-inter">
-                {showInstallGuide && <InstallGuide onClose={handleCloseGuide} />}
+        <AuthProvider>
+            <Router>
+                <div className="min-h-screen bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white font-inter">
+                    {showInstallGuide && <InstallGuide onClose={handleCloseGuide} />}
 
-                <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/add" element={<AddIncome />} />
-                    <Route path="/history" element={<History />} />
-                    <Route path="/expenses" element={<Expenses />} />
-                    <Route path="/invoice" element={<Invoice />} />
-                    <Route path="/settings" element={<Settings />} />
-                </Routes>
-            </div>
-        </Router>
+                    <Routes>
+                        <Route path="/login" element={<Login />} />
+
+                        <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                        <Route path="/add" element={<ProtectedRoute><AddIncome /></ProtectedRoute>} />
+                        <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+                        <Route path="/expenses" element={<ProtectedRoute><Expenses /></ProtectedRoute>} />
+                        <Route path="/invoice" element={<ProtectedRoute><Invoice /></ProtectedRoute>} />
+                        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                    </Routes>
+                </div>
+            </Router>
+        </AuthProvider>
     );
 }
 
