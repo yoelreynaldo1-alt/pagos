@@ -35,9 +35,9 @@ const AddIncome = () => {
 
         const start = parseISO(weekStart);
         const newDays: DayEntry[] = [];
-        const dayNames = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+        const dayNames = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 7; i++) {
             const date = addDays(start, i);
             newDays.push({
                 name: dayNames[i],

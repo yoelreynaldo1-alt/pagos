@@ -7,6 +7,7 @@ import Invoice from '@/components/Invoice';
 import Login from '@/components/Login';
 import AddIncome from '@/components/AddIncome';
 import History from '@/components/History';
+import Profile from '@/components/Profile'; // Import Profile
 
 // Placeholder components
 const Expenses = () => <div className="p-4"><h1>Expenses</h1></div>;
@@ -109,7 +110,8 @@ function App() {
                         <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
                         <Route path="/expenses" element={<ProtectedRoute><Expenses /></ProtectedRoute>} />
                         <Route path="/invoice" element={<ProtectedRoute><Invoice /></ProtectedRoute>} />
-                        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                        <Route path="/settings" element={<ProtectedRoute><Profile /></ProtectedRoute>} /> {/* Using Profile as Settings */}
+                        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                     </Routes>
                 </div>
             </Router>

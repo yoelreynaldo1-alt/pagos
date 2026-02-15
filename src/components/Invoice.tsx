@@ -1,32 +1,49 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Printer, Share2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { useEffect, useState } from 'react';
 
 const Invoice = () => {
     const navigate = useNavigate();
     const currentDate = new Date();
     const formattedDate = format(currentDate, 'MM/dd/yy');
 
-    // Mock Data based on the image and specialized for Elite Transport
+    const [profile, setProfile] = useState({
+        name: "Conductor (Sin Perfil)",
+        address: "Actualizar en Perfil",
+        city: "City, State",
+        email: "billing@elitetransport.com"
+    });
+
+    useEffect(() => {
+        const saved = localStorage.getItem('user-profile');
+        if (saved) {
+            setProfile(JSON.parse(saved));
+        }
+    }, []);
+
+    // Mock Items for now (could connect to DB simulates later)
+    const items = [
+        { day: 'Monday', date: '01/13/26', amount: 145.00 },
+        { day: 'Tuesday', date: '01/14/26', amount: 145.00 },
+        { day: 'Wednesday', date: '01/15/26', amount: 145.00 },
+        { day: 'Thursday', date: '01/16/26', amount: 145.00 },
+        { day: 'Friday', date: '01/17/26', amount: 145.00 },
+    ];
+
     const invoiceData = {
-        number: 6575,
+        number: Math.floor(Math.random() * 10000), // Random invoice number for sim
         date: formattedDate,
         company: {
             name: "Elite Transport Care",
             email: "billing@elitetransport.com"
         },
         driver: {
-            name: "Yoel Reynaldo", // Using the name from the image as placeholder or generic
-            address: "1750 Southeast 29th Lane",
-            city: "Cape Coral, FL"
+            name: profile.name,
+            address: profile.address,
+            city: profile.city
         },
-        items: [
-            { day: 'Monday', date: '01/13/26', amount: 145.00 },
-            { day: 'Tuesday', date: '01/14/26', amount: 145.00 },
-            { day: 'Wednesday', date: '01/15/26', amount: 145.00 },
-            { day: 'Thursday', date: '01/16/26', amount: 145.00 },
-            { day: 'Friday', date: '01/17/26', amount: 145.00 },
-        ]
+        items: items
     };
 
     const total = invoiceData.items.reduce((sum, item) => sum + item.amount, 0);
@@ -53,6 +70,12 @@ const Invoice = () => {
                     >
                         <Printer size={20} />
                         <span>Print / PDF</span>
+                    </button>
+                    <button
+                        onClick={() => navigate('/settings')}
+                        className="flex items-center gap-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-gray-300 transition-colors"
+                    >
+                        <span>Edit Profile</span>
                     </button>
                 </div>
             </div>

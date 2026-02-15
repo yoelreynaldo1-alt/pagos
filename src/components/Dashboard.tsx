@@ -151,15 +151,15 @@ Chofer
                         {[1, 2, 3].map((_, i) => (
                             <div key={i} className="flex items-center justify-between p-3 hover:bg-white/50 dark:hover:bg-slate-700/50 rounded-xl transition-colors">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 flex items-center justify-center">
-                                        <DollarSign size={20} />
+                                    <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center">
+                                        <Truck size={20} />
                                     </div>
                                     <div>
-                                        <p className="font-medium text-gray-900 dark:text-white">Uber Trip</p>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">Today, 2:30 PM</p>
+                                        <p className="font-medium text-gray-900 dark:text-white">Transport Load #{2340 + i}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">Entregado - Pago Confirmado</p>
                                     </div>
                                 </div>
-                                <span className="font-semibold text-gray-900 dark:text-white">+$45.20</span>
+                                <span className="font-semibold text-gray-900 dark:text-white">+$425.00</span>
                             </div>
                         ))}
                     </div>
