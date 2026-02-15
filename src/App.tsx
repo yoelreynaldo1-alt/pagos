@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import Dashboard from '@/components/Dashboard';
+import Invoice from '@/components/Invoice';
 
 import AddIncome from '@/components/AddIncome';
 
@@ -102,6 +103,7 @@ function App() {
                     <Route path="/add" element={<AddIncome />} />
                     <Route path="/history" element={<History />} />
                     <Route path="/expenses" element={<Expenses />} />
+                    <Route path="/invoice" element={<Invoice />} />
                     <Route path="/settings" element={<Settings />} />
                 </Routes>
             </div>

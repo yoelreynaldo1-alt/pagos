@@ -131,13 +131,13 @@ Chofer
                 {/* Send Invoice Action */}
                 <motion.button
                     whileTap={{ scale: 0.98 }}
-                    onClick={handleSendInvoice}
-                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-2xl p-4 flex items-center justify-center gap-3 shadow-lg shadow-green-500/20"
+                    onClick={() => navigate('/invoice')}
+                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl p-4 flex items-center justify-center gap-3 shadow-lg shadow-blue-500/20"
                 >
                     <div className="bg-white/20 p-2 rounded-full">
                         <Send size={20} />
                     </div>
-                    <span className="font-bold text-lg">Enviar Factura a Elite Transport</span>
+                    <span className="font-bold text-lg">Ver / Enviar Factura</span>
                 </motion.button>
 
                 {/* Recent Activity */}
