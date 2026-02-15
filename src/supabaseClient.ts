@@ -26,8 +26,17 @@ export const supabase = {
                 return { data: null, error: null };
             },
             delete: async () => {
-                // Mock delete logic
-                return { data: null, error: null };
+                // Return a builder that expects .eq()
+                return {
+                    eq: async (column: string, value: any) => {
+                        const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+                        // Filter out the item
+                        const updated = existing.filter((item: any) => item[column] !== value);
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+                        console.log(`[Supabase Mock] Deleted where ${column} = ${value}`);
+                        return { data: null, error: null };
+                    }
+                };
             }
         }
     },

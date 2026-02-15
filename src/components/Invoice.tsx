@@ -66,17 +66,18 @@ const Invoice = () => {
                 <div className="flex gap-2">
                     <button
                         onClick={handlePrint}
-                        className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-blue-700 transition-colors"
+                        className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-gray-200 transition-colors"
                     >
                         <Printer size={20} />
-                        <span>Print / PDF</span>
+                        <span className="hidden sm:inline">PDF</span>
                     </button>
-                    <button
-                        onClick={() => navigate('/settings')}
-                        className="flex items-center gap-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-gray-300 transition-colors"
+                    <a
+                        href={`mailto:Info@elitetransportcare.com?subject=Invoice ${invoiceData.number} - ${profile.name}&body=Adjunto la factura correspondiente a la semana %0D%0A%0D%0AGracias,%0D%0A${profile.name}`}
+                        className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-green-700 transition-colors"
                     >
-                        <span>Edit Profile</span>
-                    </button>
+                        <Share2 size={20} />
+                        <span>Enviar a Compañía</span>
+                    </a>
                 </div>
             </div>
 
