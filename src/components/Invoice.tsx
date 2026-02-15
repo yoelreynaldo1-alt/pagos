@@ -237,8 +237,8 @@ ${profile.name}`;
                 {/* Footer */}
                 <div className="mt-12 pt-8 border-t-2 border-gray-100 text-center">
                     <p className="text-gray-500 text-xs font-medium">Thank you for your business.</p>
+                    <p className="text-[10px] text-gray-300 mt-2">v2.1 - {format(new Date(), 'MM/dd/yy HH:mm')}</p>
                 </div>
-
             </div>
 
             <style>{`

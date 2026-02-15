@@ -1,21 +1,61 @@
 import { useNavigate } from 'react-router-dom';
-import { AreaChart, Area, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, Tooltip, ResponsiveContainer, XAxis } from 'recharts';
 import { motion } from 'framer-motion';
 import { Plus, DollarSign, Wallet, ArrowUpRight, ArrowDownRight, Bell, Menu, Truck, MapPin, Package, Send } from 'lucide-react';
-import { format } from 'date-fns';
-
-const data = [
-    { name: 'Mon', income: 4000, expenses: 2400 },
-    { name: 'Tue', income: 3000, expenses: 1398 },
-    { name: 'Wed', income: 2000, expenses: 9800 },
-    { name: 'Thu', income: 2780, expenses: 3908 },
-    { name: 'Fri', income: 1890, expenses: 4800 },
-    { name: 'Sat', income: 2390, expenses: 3800 },
-    { name: 'Sun', income: 3490, expenses: 4300 },
-];
+import { format, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO } from 'date-fns';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/supabaseClient';
 
 const Dashboard = () => {
     const navigate = useNavigate();
+    const [chartData, setChartData] = useState<any[]>([]);
+    const [weeklyTotal, setWeeklyTotal] = useState(0);
+    const [recentActivity, setRecentActivity] = useState<any[]>([]);
+    const [profileImg, setProfileImg] = useState("https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff");
+
+    useEffect(() => {
+        loadDashboardData();
+        const savedProfile = localStorage.getItem('user-profile');
+        if (savedProfile) {
+            const p = JSON.parse(savedProfile);
+            if (p.name) {
+                setProfileImg(`https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=0D8ABC&color=fff`);
+            }
+        }
+    }, []);
+
+    const loadDashboardData = async () => {
+        const { data } = await supabase.from('incomes').select();
+
+        if (data) {
+            // 1. Calculate Weekly Chart Data
+            const today = new Date();
+            const start = startOfWeek(today, { weekStartsOn: 1 });
+            const end = endOfWeek(today, { weekStartsOn: 1 });
+            const weekDays = eachDayOfInterval({ start, end });
+
+            const chart = weekDays.map(day => {
+                const dayIncome = data
+                    .filter((d: any) => isSameDay(parseISO(d.date), day))
+                    .reduce((sum: number, d: any) => sum + (parseFloat(d.amount) || 0), 0);
+
+                return {
+                    name: format(day, 'EEE'),
+                    income: dayIncome,
+                    fullDate: day
+                };
+            });
+            setChartData(chart);
+
+            // 2. Calculate Weekly Total
+            const total = chart.reduce((acc, curr) => acc + curr.income, 0);
+            setWeeklyTotal(total);
+
+            // 3. Get Recent Activity (last 3 entries)
+            const sorted = [...data].sort((a: any, b: any) => new Date(b.created_at || b.date).getTime() - new Date(a.created_at || a.date).getTime());
+            setRecentActivity(sorted.slice(0, 3));
+        }
+    };
 
     const handleSendInvoice = () => {
         const currentDate = format(new Date(), 'MMMM d, yyyy');
@@ -76,26 +116,28 @@ Chofer
                     <div className="flex justify-between items-end mb-4">
                         <div>
                             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Weekly Earnings</p>
-                            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">$1,830.00</h2>
+                            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">${weeklyTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h2>
                         </div>
                         <div className="flex items-center gap-1 text-green-500 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full text-xs font-medium">
                             <ArrowUpRight size={14} />
-                            <span>+12.5%</span>
+                            <span>Active</span>
                         </div>
                     </div>
 
                     <div className="h-48 w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={data}>
+                            <AreaChart data={chartData}>
                                 <defs>
                                     <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
                                         <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
+                                <XAxis dataKey="name" hide />
                                 <Tooltip
                                     contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                                     cursor={{ stroke: '#94a3b8', strokeWidth: 1 }}
+                                    formatter={(value: number) => [`$${value}`, 'Income']}
                                 />
                                 <Area type="monotone" dataKey="income" stroke="#2563eb" strokeWidth={3} fillOpacity={1} fill="url(#colorIncome)" />
                             </AreaChart>
@@ -148,20 +190,30 @@ Chofer
                     </div>
 
                     <div className="space-y-4">
-                        {[1, 2, 3].map((_, i) => (
-                            <div key={i} className="flex items-center justify-between p-3 hover:bg-white/50 dark:hover:bg-slate-700/50 rounded-xl transition-colors">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center">
-                                        <Truck size={20} />
+                        {recentActivity.length === 0 ? (
+                            <p className="text-center text-gray-400 py-4">No recent activity</p>
+                        ) : (
+                            recentActivity.map((item, i) => (
+                                <div key={item.id || i} className="flex items-center justify-between p-2 hover:bg-white/50 dark:hover:bg-slate-700/50 rounded-xl transition-colors">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center">
+                                            <Truck size={20} />
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-gray-900 dark:text-white capitalize">
+                                                {format(parseISO(item.date), 'EEEE', { weekStartsOn: 1 })}
+                                            </p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                {format(parseISO(item.date), 'MM/dd/yyyy')}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="font-medium text-gray-900 dark:text-white">Transport Load #{2340 + i}</p>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">Entregado - Pago Confirmado</p>
-                                    </div>
+                                    <span className="font-semibold text-gray-900 dark:text-white">
+                                        +${item.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                    </span>
                                 </div>
-                                <span className="font-semibold text-gray-900 dark:text-white">+$425.00</span>
-                            </div>
-                        ))}
+                            ))
+                        )}
                     </div>
                 </div>
             </main>

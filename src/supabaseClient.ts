@@ -16,10 +16,18 @@ export const supabase = {
                 const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
                 // If array, spread it; if object, add one
                 const rows = Array.isArray(newData) ? newData : [newData];
-                const updated = [...existing, ...rows];
+
+                // Add unique IDs
+                const rowsWithIds = rows.map((row: any) => ({
+                    ...row,
+                    id: row.id || crypto.randomUUID(), // modern browsers support this
+                    created_at: row.created_at || new Date().toISOString()
+                }));
+
+                const updated = [...existing, ...rowsWithIds];
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-                console.log(`[Supabase Mock] Inserted into ${table}:`, rows);
-                return { data: rows, error: null };
+                console.log(`[Supabase Mock] Inserted into ${table}:`, rowsWithIds);
+                return { data: rowsWithIds, error: null };
             },
             update: async (updates: any) => {
                 // Mock update logic would go here

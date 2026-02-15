@@ -29,28 +29,18 @@ const History = () => {
         loadData();
     }, []);
 
-    const handleDelete = async (id: string, date: string) => {
+    const handleDelete = async (id: string) => {
         if (!confirm('¿Estás seguro de eliminar este registro?')) return;
 
-        // In mock, we might delete by date if ID isn't unique, but let's try ID
-        // The mock 'insert' doesn't add IDs, so we might need to rely on Date+Amount or specific index?
-        // Let's assume for now we can rebuild the list without this item and save it back.
-        // Since Supabase mock is simple, we'll cheat a bit for the mock:
-        // We'll filter the STATE and update localStorage directly via the mock's delete if we had IDs.
-        // But since we didn't save IDs in AddIncome, let's filter by Date + Amount match for the mock delete
+        const { error } = await supabase.from('incomes').delete().eq('id', id);
 
-        // Actually, let's update Supabase Mock to support 'eq' properly or just do manual filter + save in client for simulation?
-        // Correct way: The mock delete I just wrote expects .eq('id', value).
-        // But my inserted data doesn't have IDs!
-        // Quick fix: In `AddIncome`, let's add a random ID.
-        // For now, let's just manually update localStorage here to keep it simple for the user.
-
-        const updated = transactions.filter(t => t.id !== id);
-        // Remove the 'id' and 'dateObj' temporary fields before saving back to raw storage
-        const rawToSave = updated.map(({ id, dateObj, ...rest }) => rest);
-
-        localStorage.setItem('supabase-mock-incomes', JSON.stringify(rawToSave));
-        setTransactions(updated);
+        if (!error) {
+            // Update local state
+            const updated = transactions.filter(t => t.id !== id);
+            setTransactions(updated);
+        } else {
+            alert('Error al eliminar');
+        }
     };
 
     const handleEdit = (transaction: any) => {
@@ -138,7 +128,7 @@ const History = () => {
                                                     <Edit2 size={16} />
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDelete(item.id, item.date)}
+                                                    onClick={() => handleDelete(item.id)}
                                                     className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                                                 >
                                                     <Trash2 size={16} />
