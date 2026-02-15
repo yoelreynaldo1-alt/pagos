@@ -74,6 +74,24 @@ export const translations = {
             save: "Guardar Gasto",
             history: "Historial de Gastos",
             noExpenses: "No hay gastos registrados."
+        },
+        install: {
+            title: "Instalar WeekPay",
+            iosInstructions: {
+                share: "Toca el botón Compartir",
+                shareHint: "Usualmente en la parte inferior.",
+                addToHome: "Selecciona 'Agregar a Inicio'",
+                addToHomeHint: "Desliza hacia abajo o busca el icono +.",
+                confirm: "Toca 'Agregar' para confirmar",
+                confirmHint: "En la esquina superior derecha."
+            },
+            androidInstructions: {
+                menu: "Toca el menú del navegador",
+                menuHint: "Usualmente los tres puntos en la esquina.",
+                install: "Selecciona 'Instalar aplicación'",
+                installHint: "O 'Agregar a la pantalla principal'."
+            },
+            appIcon: "WeekPay"
         }
     },
     en: {
@@ -151,6 +169,24 @@ export const translations = {
             save: "Save Expense",
             history: "Expense History",
             noExpenses: "No expenses recorded."
+        },
+        install: {
+            title: "Install WeekPay",
+            iosInstructions: {
+                share: "Tap the Share button",
+                shareHint: "Usually at the bottom of your screen.",
+                addToHome: "Select 'Add to Home Screen'",
+                addToHomeHint: "Scroll down or swipe to find the + icon.",
+                confirm: "Tap 'Add' to confirm",
+                confirmHint: "Top right corner of the screen."
+            },
+            androidInstructions: {
+                menu: "Tap the browser menu",
+                menuHint: "Usually the three dots in the corner.",
+                install: "Select 'Install App'",
+                installHint: "Or 'Add to Home Screen'."
+            },
+            appIcon: "WeekPay"
         }
     }
 };

@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, MapPin, Building, Mail, Save } from 'lucide-react';
+import { ArrowLeft, User, MapPin, Building, Mail, Save, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
+import { useInstallPrompt } from '@/context/InstallPromptContext';
 
 const Profile = () => {
     const { t } = useLanguage();
+    const { triggerInstallPrompt } = useInstallPrompt();
     const navigate = useNavigate();
 
     // State for profile data
@@ -136,6 +138,14 @@ const Profile = () => {
                     <Save size={20} />
                     {t('profile.save')}
                 </motion.button>
+
+                <button
+                    onClick={triggerInstallPrompt}
+                    className="w-full mt-4 p-4 flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                >
+                    <Download size={20} />
+                    {t('install.title')}
+                </button>
 
             </main>
         </div>

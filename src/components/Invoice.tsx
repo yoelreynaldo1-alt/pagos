@@ -99,9 +99,9 @@ ${profile.name}`;
         const encSubject = encodeURIComponent(subject);
         const encBody = encodeURIComponent(bodyContent);
 
-        // Gmail web interface
-        const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${recipientEmail}&su=${encSubject}&body=${encBody}`;
-        window.open(url, '_blank', 'noopener,noreferrer');
+        // Standard mailto link
+        const url = `mailto:${recipientEmail}?subject=${encSubject}&body=${encBody}`;
+        window.location.href = url;
 
         setShowEmailModal(false);
     };
